@@ -46,10 +46,10 @@ MainWindow::MainWindow(QWidget *parent, QString windowName) :
     messageWidget->setObjectName("messagesPlaceholder");
     QWidget *bttnWidget = new QWidget();
     QGridLayout *gridLayout = new QGridLayout();
-    messageLayout = new QVBoxLayout(messageWidget);
+    messageLayout = new QVBoxLayout();
     gridLayout->setContentsMargins(0,3,0,3);
-    gridLayout->setSpacing(0);
-    messageLayout->setContentsMargins(0,15,0,15);
+//    gridLayout->setSpacing(0);
+    messageLayout->setContentsMargins(0,10,0,10);
     QVBoxLayout *buttonsLayout = new QVBoxLayout();
     QPushButton *button1 = new QPushButton("Add Random Message");
     QPushButton *button3 = new QPushButton("Clear ALL");
@@ -64,9 +64,11 @@ MainWindow::MainWindow(QWidget *parent, QString windowName) :
     scrollarea->setWidgetResizable(true);
     centralW->setLayout(gridLayout);
     messageWidget->setLayout(messageLayout);
-    messageWidget->setFixedWidth(this->width()-20);
+//    messageWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+    scrollarea->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
+//    messageWidget->setFixedWidth(this->width()-20);
     bttnWidget->setLayout(buttonsLayout);
-    bttnWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+//    bttnWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     buttonsLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     buttonsLayout->setAlignment(Qt::AlignCenter);
     QWidget * counterWidget = new QWidget(bttnWidget);
@@ -79,10 +81,10 @@ MainWindow::MainWindow(QWidget *parent, QString windowName) :
 //    _counterLCD->setMaximumSize(this->width(), 30);
     _counterLCD->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
     _counterLCD->display(QString::number(messageLayout->count()));
-    _counterLCD->setStyleSheet("align: center;");
-    counterWidget->setStyleSheet("background-color: transparent;");
+    _counterLCD->setStyleSheet("text-align: center;");
+//    counterWidget->setStyleSheet("background-color: transparent;");
     QSpacerItem* spacer = new QSpacerItem(0, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-    QHBoxLayout* counterLayout = new QHBoxLayout(bttnWidget);
+    QHBoxLayout* counterLayout = new QHBoxLayout();
 
     counterLayout->setAlignment(Qt::AlignCenter);
     counterLayout->addSpacerItem(spacer);
@@ -92,9 +94,9 @@ MainWindow::MainWindow(QWidget *parent, QString windowName) :
     buttonsLayout->addLayout(counterLayout);
     buttonsLayout->addWidget(button1);
     buttonsLayout->addWidget(button3);
+    messageLayout->insertStretch(-1);
 
-
-
+    gridLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     gridLayout->addWidget(menuBar, 0, 0);
     gridLayout->addWidget(scrollarea, 1, 0);
     gridLayout->addWidget(bttnWidget, 2, 0);
@@ -102,17 +104,16 @@ MainWindow::MainWindow(QWidget *parent, QString windowName) :
     gridLayout->addWidget(new QSizeGrip(this), 3,0,1,0, Qt::AlignBottom | Qt::AlignRight);
 
     gridLayout->setAlignment(messageLayout,Qt::AlignTop);
-    gridLayout->setAlignment(buttonsLayout,Qt::AlignAbsolute);
-
+    gridLayout->setAlignment(buttonsLayout,Qt::AlignBottom);
     setCentralWidget(centralW);
-
+    messageWidget->setMinimumWidth(1);
     connect(button1, SIGNAL(clicked(bool)), this, SLOT(addMessageClicked()));
     connect(button3, SIGNAL(clicked(bool)), this, SLOT(clearAllMessages()));
     connect(exitAction, SIGNAL(triggered(bool)), this, SLOT(exitClicked()));
     connect(closeAction, SIGNAL(triggered(bool)), this, SLOT(closeClicked()));
     QString randomUser = QString("justinfan")+QString::number(rand() % 9999999+1345531, 10);
     qDebug() << "RandomUser: " << randomUser;
-    TwitchIRC * irc = new TwitchIRC("199.9.255.147", 443, "AtheneLIVE", "d3m0niqbot", "oauth:k81x5y0q1ooo3cf5yepen2w5mrro7i");
+    TwitchIRC * irc = new TwitchIRC("199.9.255.147", 443, "sodapoppin", randomUser, "oauth:k81x5y0q1ooo3cf5yepen2w5mrro7i");
     connect(irc, SIGNAL(messageReceived(int,QString,QString,QString,QString,QString)), this, SLOT(addMessage(int,QString,QString,QString,QString,QString)));
 }
 
@@ -167,7 +168,6 @@ void MainWindow::paintEvent(QPaintEvent *)
 
 void MainWindow::resizeEvent(QResizeEvent *)
 {
-    messageWidget->setFixedWidth(this->width());
     saveWindowSettings();
 
 }
@@ -217,23 +217,26 @@ void MainWindow::addMessageClicked(){
 
 void MainWindow::clearAllMessages()
 {
-    QList<Message *> messages = messageWidget->findChildren<Message *>();
-    foreach(Message * message, messages)
-    {
-        delete message;
-    }
+    this->clearOldMessages(messageLayout->count());
+
+    _counterLCD->display(QString::number(messageLayout->count()));
 
 }
 
 void MainWindow::clearOldMessages(int n)
 {
-    QList<Message *> messages = messageWidget->findChildren<Message *>();
-    for(int i=0; i<n; i++)
+    if ( messageLayout != NULL )
     {
-        delete messages[i];
+        QLayoutItem* item;
+        for (int i=1; i<n; i++ )
+        {
+            if((item = messageLayout->takeAt(1)) != NULL){
+                delete item->widget();
+                delete item;
+            }
+        }
     }
 }
-
 
 void MainWindow::exitClicked()
 {

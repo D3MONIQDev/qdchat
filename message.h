@@ -14,7 +14,7 @@ using namespace std;
 
 class Message : public QWidget
 {
-//    Q_OBJECT
+    Q_OBJECT
 public:
     Message(QWidget *parent, int  msgType, QString nickname, QString msg, QString toName="", QString colorHex="");
     ~Message();
@@ -26,13 +26,13 @@ protected:
     void paintEvent(QPaintEvent *event);
 private:
     bool _painted;
-    MessageItem* _messageText;
-    MessageItem* _messageNickname;
-    MessageItem* _messageToName;
-    MessageItem* _messageServiceIcon;
+//    MessageItem* _messageText;
+//    MessageItem* _messageNickname;
+//    MessageItem* _messageToName;
+//    MessageItem* _messageServiceIcon;
     QString getServiceIconUrl(int);
     int getMaxWidth();
-    QList<MessageItem*> _listMessageItems;
+//    QList<MessageItem*> _listMessageItems;
 
 signals:
 

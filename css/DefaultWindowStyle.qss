@@ -1,8 +1,9 @@
 QWidget#message{
-    background-color: #55053667;
+    background-color: #99053667;
     color: #2ED6FF;
     font-family: Arial;
 }
+
 QWidget#messagesPlaceholder{
     background-color: transparent;
 }
