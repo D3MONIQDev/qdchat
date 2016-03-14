@@ -13,7 +13,7 @@ Settings::Settings()
 
 Settings::~Settings()
 {
-    delete this;
+    delete _settings;
 }
 
 void Settings::saveSettings(QString name)

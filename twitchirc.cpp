@@ -5,10 +5,11 @@
 #include <QNetworkAccessManager>
 #include <stdio.h>
 #include <QMap>
-#include <message.h>
+#include "services.h"
 TwitchIRC::TwitchIRC(QString host, int port, QString channel, QString nickname, QString token) : Socket(host,port,channel,nickname,token)
 {
     _hostValidated = false;
+
     this->evaluateChannelBasedHostAddress();
 }
 
@@ -27,6 +28,21 @@ void TwitchIRC::setHostValidated(bool hostValidated)
     _hostValidated = hostValidated;
 }
 
+QHash<QString, QString> *TwitchIRC::getHashEmotes()
+{
+    return &_hashEmotes;
+}
+
+int TwitchIRC::getHashEmotesCount()
+{
+    return _hashEmotes.count();
+}
+
+void TwitchIRC::setHashEmotes(QHash<QString, QString> *hash)
+{
+    _hashEmotes = *hash;
+}
+
 void TwitchIRC::evaluateChannelBasedHostAddress()
 {
     QNetworkAccessManager * networkManager;
@@ -34,8 +50,14 @@ void TwitchIRC::evaluateChannelBasedHostAddress()
     QNetworkRequest request;
     request.setUrl(url);
     networkManager = new QNetworkAccessManager(this);
-    connect(networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(onResult(QNetworkReply*)));
-    networkManager->get(request);  // GET
+    connect(networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(onChatAddressesResult(QNetworkReply*)));
+    QNetworkReply* reply;
+    try{
+       reply = networkManager->get(request);  // GET
+    }
+    catch(std::exception &e){
+       qDebug() << reply->errorString();
+    }
 
 }
 
@@ -69,8 +91,35 @@ void TwitchIRC::parseMessage(QString msg)
             msgMap[msgList[i].split( "=" )[0]] = msgList[i].split( "=" )[1];
 
     msgMap["messageText"] = privMsgList[1];
-//    qDebug() << msgMap;
-    emit messageReceived(Message::services::Twitch, _channel, msgMap["display-name"], msgMap["@color"], msgMap["messageText"], "");
+    nickname = msgMap["display-name"];
+    if(nickname == ""){
+        int start = msgMap["user-type"].indexOf(":")+1;
+        int end = msgMap["user-type"].indexOf("!");
+        int length=end-start;
+        nickname = msgMap["user-type"].mid(start, length);
+//        qDebug() << nickname;
+    }
+    msgMap["messageText"].replace(msgMap["messageText"].indexOf("\r"), 2, " ");
+    msgMap["messageText"].replace(msgMap["messageText"].indexOf("\n"), 2, " ");
+    foreach(QString word, msgMap["messageText"].split(" ")){
+        if(_hashEmotes.contains(word)){
+            QString img = "<img src='https://static-cdn.jtvnw.net/emoticons/v1/"+_hashEmotes[word]+"/1.0'/>";
+            msgMap["messageText"].replace(msgMap["messageText"].indexOf(word), word.length(), img);
+        }
+    }
+
+
+    emit messageReceived(Services::Twitch, _channel, nickname, msgMap["@color"], msgMap["messageText"], "");
+}
+
+void TwitchIRC::loadTwitchEmotes()
+{
+    QNetworkAccessManager *networkManager = new QNetworkAccessManager(this);
+    QUrl url("https://twitchemotes.com/api_cache/v2/images.json");
+    QNetworkRequest request;
+    request.setUrl(url);
+    connect(networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(onTwitchEmotesResult(QNetworkReply*)));
+    networkManager->get(request);  // GET
 }
 
 void TwitchIRC::dataReceived()
@@ -115,9 +164,27 @@ void TwitchIRC::connected()
 
 }
 
-void TwitchIRC::onResult(QNetworkReply *reply)
+void TwitchIRC::onChatAddressesResult(QNetworkReply *reply)
 {
-       parseJsonReply(reply);
+    if(!reply->error())
+         parseJsonReply(reply);
 
+}
+
+void TwitchIRC::onTwitchEmotesResult(QNetworkReply *reply)
+{
+    QString data = (QString) reply->readAll();
+     qDebug() << "Emotes JSON received. Parsing...";
+    QJsonDocument jsonResponse = QJsonDocument::fromJson(data.toUtf8());
+    QJsonObject json = jsonResponse.object();
+
+    QVariantHash emotes = json["images"].toObject().toVariantHash();
+//    qDebug() << jsonResponse;
+
+    for(QVariantHash::const_iterator iter = emotes.begin(); iter != emotes.end(); ++iter) {
+        _hashEmotes.insert(iter.value().toMap()["code"].toString() ,iter.key() );
+    }
+
+    qDebug() << "Emotes loading finished";
 }
 

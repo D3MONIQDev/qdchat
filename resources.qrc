@@ -7,4 +7,5 @@
     <qresource lang="css" prefix="/styles">
         <file>css/DefaultWindowStyle.qss</file>
     </qresource>
+    <qresource prefix="/"/>
 </RCC>

@@ -1,0 +1,79 @@
+#webViewArea{
+    width:100%;
+    height:100%;
+    color:white;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#messageContainer{
+    background-color: rgba(11, 37, 54, 0.4);
+    margin: 5px 0 5px 0;
+}
+#nickname{
+    text-align: right;
+    vertical-align: top;
+    width:100%;
+}
+
+#channelName{
+    text-align: left;
+    vertical-align: top;
+}
+
+#serviceIcon{
+
+}
+
+#messageText{
+    color: #9BCD9B;
+    word-wrap: break-word;
+    word-break: break-all;
+    vertical-align: top;
+    margin: 0;
+}
+
+body
+{
+    background-color: transparent;
+/*    background-color: rgba( 0,0,0, .5 );*/
+    padding: 0px;
+}
+
+table{
+
+}
+
+td{
+    color: #00FF7F;
+    text-align: left;
+}
+
+tr{
+/*    vertical-align: middle;*/
+}
+
+img{
+    display: inline-block;
+    vertical-align: text-top;
+}
+
+
+
+::-webkit-scrollbar
+{
+    background-color: #552A2929;
+    width: 10px;
+    margin: 0 0 0 0;
+    height: 12px; /* for horizontal scrollbars */
+}
+
+::-webkit-scrollbar-track
+{
+  background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb
+{
+  background: rgba(0, 0, 0, 0.2);
+}

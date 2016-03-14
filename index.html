@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>QDChat</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="css/default.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    </head>
+    <body onLoad="initWebSocket();">
+        <div id="webViewArea">
+
+        </div>
+        <script type="text/javascript">
+            var messageArea = document.getElementById("webViewArea");
+            var manualScrolling = false;
+            $('body,html').bind('scroll mousedown wheel DOMMouseScroll mousewheel keyup', function(e){
+             if ( e.which > 0 || e.type == "mousedown" || e.type == "mousewheel"){
+              $("html,body").stop();
+                manualScrolling = true;
+             }
+             else
+                 manualScrolling = false;
+            });
+            $('body,html').bind('scroll mouseup wheel DOMMouseScroll mousewheel keyup', function(e){
+             if ( e.which > 0 || e.type == "mouseup" || e.type == "mousewheel"){
+                manualScrolling = false;
+             }
+            });
+            function scroll_to(div){
+                    $('html, body').animate({
+                            scrollTop: $(div).offset().top
+                    },1);
+            }
+
+            function debug(message) {
+                var div = document.createElement('div');
+                div.id = 'messageContainer';
+                messageArea.appendChild(div);
+                div.innerHTML = message;
+                if(!manualScrolling)
+                    scroll_to(div);
+            }
+
+            var wsUri = "ws://127.0.0.1:1234";
+            var websocket = null;
+
+            function initWebSocket() {
+                try {
+                    if (typeof MozWebSocket == 'function')
+                        WebSocket = MozWebSocket;
+                    if ( websocket && websocket.readyState == 1 )
+                        websocket.close();
+                    websocket = new WebSocket( wsUri );
+                    websocket.onopen = function (evt) {
+                        //debug("CONNECTED");
+                    };
+                    websocket.onclose = function (evt) {
+                        //debug("DISCONNECTED");
+                    };
+                    websocket.onmessage = function (evt) {
+                        debug( evt.data );
+                    };
+                    websocket.onerror = function (evt) {
+                        console.log('ERROR: ' + evt.data);
+                    };
+                } catch (exception) {
+                    console.log('ERROR: ' + exception);
+                }
+            }
+
+            function stopWebSocket() {
+                if (websocket)
+                    websocket.close();
+            }
+
+            function checkSocket() {
+                if (websocket != null) {
+                    var stateStr;
+                    switch (websocket.readyState) {
+                        case 0: {
+                            stateStr = "CONNECTING";
+                            break;
+                        }
+                        case 1: {
+                            stateStr = "OPEN";
+                            break;
+                        }
+                        case 2: {
+                            stateStr = "CLOSING";
+                            break;
+                        }
+                        case 3: {
+                            stateStr = "CLOSED";
+                            break;
+                        }
+                        default: {
+                            stateStr = "UNKNOW";
+                            break;
+                        }
+                    }
+                    debug("WebSocket state = " + websocket.readyState + " ( " + stateStr + " )");
+                } else {
+                    debug("WebSocket is null");
+                }
+            }
+        </script>
+    </body>
+</html>

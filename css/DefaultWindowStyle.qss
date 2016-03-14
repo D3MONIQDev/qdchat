@@ -12,6 +12,10 @@ QScrollArea{
     background-color: transparent;
 }
 
+QWebEngineView{
+    background-color: transparent;
+}
+
 /**DO NOT CHANGE**/
 QProgressBar:horizontal {
     border: 1px solid #3A3939;
@@ -210,13 +214,14 @@ QRadioButton::indicator:unchecked:disabled
 
 QMenuBar
 {
-    background-color: #302F2F;
+    background-color: transparent;
     color: silver;
 }
 
 QMenuBar::item
 {
     background: transparent;
+    margin: 5px;
 }
 
 QVBoxLayout{
@@ -227,6 +232,7 @@ QMenuBar::item:selected
 {
     background: transparent;
     border: 1px solid #3A3939;
+    margin: 5px;
 }
 
 QMenuBar::item:pressed
@@ -236,11 +242,12 @@ QMenuBar::item:pressed
     color: black;
     margin-bottom:-1px;
     padding-bottom:1px;
+    margin: 5px;
 }
 
 QMenu
 {
-    border: 1px solid #3A3939;
+    border: 3px solid #3A3939;
     color: silver;
     margin: 2px;
 }
@@ -638,8 +645,17 @@ QPushButton:disabled
 }
 
 QPushButton:focus {
-    background-color: #3d8ec9;
-    color: white;
+    color: silver;
+    background-color: #302F2F;
+    border-width: 1px;
+    border-color: #4A4949;
+    border-style: solid;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 2px;
+    outline: none;
 }
 
 QComboBox

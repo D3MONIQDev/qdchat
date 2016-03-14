@@ -4,8 +4,6 @@
 void Socket::dataReceived()
 {
     qDebug() << "Data received";
-
-
 }
 
 void Socket::errorReceived()
